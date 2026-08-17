@@ -212,6 +212,49 @@ $(NUMBERINPUT_EXAMPLE)
 """
 NumberInput
 
+"""
+    numberinput_integer_attribute(value)
+
+Return whether an HTML number input attribute denotes an integer value.
+"""
+numberinput_integer_attribute(value::Integer) = true
+numberinput_integer_attribute(value::AbstractFloat) = isfinite(value) && isinteger(value)
+numberinput_integer_attribute(value::Observable) = numberinput_integer_attribute(value[])
+function numberinput_integer_attribute(value::AbstractString)
+    parsed = tryparse(Float64, value)
+    return !isnothing(parsed) && numberinput_integer_attribute(parsed)
+end
+numberinput_integer_attribute(value) = false
+
+"""
+    numberinput_prefers_integer_display(ni)
+
+Return whether a NumberInput should display integer-valued floats without `.0`.
+"""
+function numberinput_prefers_integer_display(ni::NumberInput)
+    attrs = ni.attributes
+    return all(
+        key -> haskey(attrs, key) && numberinput_integer_attribute(attrs[key]),
+        (:step, :min, :max),
+    ) &&
+           numberinput_integer_attribute(ni.value[])
+end
+
+"""
+    numberinput_display_value(session, ni)
+
+Return the observable value attribute used to display a NumberInput.
+"""
+function numberinput_display_value(session::Session, ni::NumberInput)
+    if numberinput_prefers_integer_display(ni)
+        return map(session, ni.value) do value
+            numberinput_integer_attribute(value) ? string(round(Int, value)) : string(value)
+        end
+    else
+        return ni.value
+    end
+end
+
 function jsrender(session::Session, ni::NumberInput)
     style = get(ni.attributes, :style, Styles())
     css = isnothing(style) ? Styles() : Styles(BUTTON_STYLE, style)
@@ -220,7 +263,7 @@ function jsrender(session::Session, ni::NumberInput)
         session,
         DOM.input(;
             type="number",
-            value=ni.value,
+            value=numberinput_display_value(session, ni),
             onchange=js"event => {
                 const new_value = parseFloat(event.srcElement.value);
                 if ($(ni.value).value != new_value) {

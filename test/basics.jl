@@ -11,6 +11,31 @@
     @test Bonito.Slider([:a, :b, :c]; value=:b).index[] == 2      # non-numeric exact
 end
 
+@testset "NumberInput integer display" begin
+    ni = Bonito.NumberInput(55.0; step=1, min=0, max=100)
+    @test Bonito.numberinput_prefers_integer_display(ni)
+
+    session = OfflineSession()
+    displayed = Bonito.numberinput_display_value(session, ni)
+    @test displayed[] == "55"
+    ni.value[] = 56.0
+    @test displayed[] == "56"
+    ni.value[] = 56.5
+    @test displayed[] == "56.5"
+    close(session)
+
+    @test !Bonito.numberinput_prefers_integer_display(
+        Bonito.NumberInput(55.0; step=0.5, min=0, max=100)
+    )
+    @test !Bonito.numberinput_prefers_integer_display(
+        Bonito.NumberInput(55.5; step=1, min=0, max=100)
+    )
+    @test !Bonito.numberinput_prefers_integer_display(Bonito.NumberInput(55.0; step=1, min=0))
+    @test Bonito.numberinput_prefers_integer_display(
+        Bonito.NumberInput(55.0; step="1", min="0", max="100")
+    )
+end
+
 @testset "Asset value equality dedup" begin
     # `Asset(path)` builds a fresh struct each call; without value equality two
     # Assets of the same file wouldn't dedup in an `OrderedSet`.
