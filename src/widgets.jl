@@ -228,10 +228,12 @@ Return whether a NumberInput should display integer-valued floats without `.0`.
 """
 function numberinput_prefers_integer_display(ni::NumberInput)
     attrs = ni.attributes
-    return all(
-        key -> haskey(attrs, key) && numberinput_integer_attribute(attrs[key]),
-        (:step, :min, :max),
-    ) &&
+    return haskey(attrs, :step) &&
+           haskey(attrs, :min) &&
+           haskey(attrs, :max) &&
+           numberinput_integer_attribute(attrs[:step]) &&
+           numberinput_integer_attribute(attrs[:min]) &&
+           numberinput_integer_attribute(attrs[:max]) &&
            numberinput_integer_attribute(ni.value[])
 end
 
