@@ -25,6 +25,7 @@ using RelocatableFolders: @path, Path, getroot
 using URIs
 
 using Base: RefValue
+import WidgetsBase: NumberInput
 
 # these are used in HTTPServer and need to be defined already
 function update_app! end
