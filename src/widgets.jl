@@ -221,25 +221,17 @@ numberinput_float_attribute(value::AbstractFloat) = true
 numberinput_float_attribute(value::Observable) = numberinput_float_attribute(value[])
 numberinput_float_attribute(value) = false
 
-const NUMBERINPUT_INTEGER_DISPLAY_KEY = :bonito_integer_display
-
 """
-    numberinput_prefers_float_display(value, attrs)
+    numberinput_prefers_float_display(ni)
 
-Return whether the initial value or present control attributes request float display.
+Return whether present number-control attributes request float display.
 """
-function numberinput_prefers_float_display(value, attrs)
-    isinteger(value) || return true
+function numberinput_prefers_float_display(ni::NumberInput)
+    attrs = ni.attributes
     haskey(attrs, :step) && numberinput_float_attribute(attrs[:step]) && return true
     haskey(attrs, :min) && numberinput_float_attribute(attrs[:min]) && return true
     haskey(attrs, :max) && numberinput_float_attribute(attrs[:max]) && return true
     return false
-end
-
-function NumberInput(value::Float64; kw...)
-    attrs = Dict{Symbol,Any}(kw)
-    attrs[NUMBERINPUT_INTEGER_DISPLAY_KEY] = !numberinput_prefers_float_display(value, attrs)
-    return NumberInput(Observable(value), attrs)
 end
 
 """
@@ -247,9 +239,7 @@ end
 
 Return whether a NumberInput should display integer values without `.0`.
 """
-function numberinput_prefers_integer_display(ni::NumberInput)
-    return get(ni.attributes, NUMBERINPUT_INTEGER_DISPLAY_KEY, false)
-end
+numberinput_prefers_integer_display(ni::NumberInput) = !numberinput_prefers_float_display(ni)
 
 """
     numberinput_display_value(session, ni)
@@ -267,11 +257,9 @@ function numberinput_display_value(session::Session, ni::NumberInput)
 end
 
 function jsrender(session::Session, ni::NumberInput)
-    attributes = copy(ni.attributes)
-    delete!(attributes, NUMBERINPUT_INTEGER_DISPLAY_KEY)
-    style = get(attributes, :style, Styles())
+    style = get(ni.attributes, :style, Styles())
     css = isnothing(style) ? Styles() : Styles(BUTTON_STYLE, style)
-    autocomplete = get(attributes, :autocomplete, "off")
+    autocomplete = get(ni.attributes, :autocomplete, "off")
     return jsrender(
         session,
         DOM.input(;
@@ -283,7 +271,7 @@ function jsrender(session::Session, ni::NumberInput)
                     $(ni.value).notify(new_value);
                 }
             }",
-            attributes...,
+            ni.attributes...,
             style=css,
             autocomplete=autocomplete,
         ),
