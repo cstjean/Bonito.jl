@@ -228,6 +228,7 @@ Return whether present number-control attributes request float display.
 """
 function numberinput_prefers_float_display(ni::NumberInput)
     attrs = ni.attributes
+    isinteger(ni.value[]) || return true
     haskey(attrs, :step) && numberinput_float_attribute(attrs[:step]) && return true
     haskey(attrs, :min) && numberinput_float_attribute(attrs[:min]) && return true
     haskey(attrs, :max) && numberinput_float_attribute(attrs[:max]) && return true

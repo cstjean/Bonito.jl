@@ -36,6 +36,9 @@ end
     @test !Bonito.numberinput_prefers_integer_display(
         Bonito.NumberInput(55.0; step=1, min=0, max=100.0)
     )
+    @test !Bonito.numberinput_prefers_integer_display(
+        Bonito.NumberInput(55.5; step=1, min=0, max=100)
+    )
     @test Bonito.numberinput_prefers_integer_display(Bonito.NumberInput(55.0; step=1, min=0))
     @test Bonito.numberinput_prefers_integer_display(
         Bonito.NumberInput(55.0; step="1", min="0", max="100")
