@@ -213,29 +213,33 @@ $(NUMBERINPUT_EXAMPLE)
 NumberInput
 
 """
-    numberinput_integer_attribute(value)
+    numberinput_float_attribute(value)
 
-Return whether an HTML number input attribute denotes an integer value.
+Return whether an HTML number input attribute is a floating point value.
 """
-numberinput_integer_attribute(value::Integer) = true
-numberinput_integer_attribute(value::Observable) = numberinput_integer_attribute(value[])
-numberinput_integer_attribute(value) = false
+numberinput_float_attribute(value::AbstractFloat) = true
+numberinput_float_attribute(value::Observable) = numberinput_float_attribute(value[])
+numberinput_float_attribute(value) = false
+
+"""
+    numberinput_prefers_float_display(ni)
+
+Return whether present number-control attributes request float display.
+"""
+function numberinput_prefers_float_display(ni::NumberInput)
+    attrs = ni.attributes
+    haskey(attrs, :step) && numberinput_float_attribute(attrs[:step]) && return true
+    haskey(attrs, :min) && numberinput_float_attribute(attrs[:min]) && return true
+    haskey(attrs, :max) && numberinput_float_attribute(attrs[:max]) && return true
+    return false
+end
 
 """
     numberinput_prefers_integer_display(ni)
 
-Return whether a NumberInput should display integer-valued floats without `.0`.
+Return whether a NumberInput should display integer values without `.0`.
 """
-function numberinput_prefers_integer_display(ni::NumberInput)
-    attrs = ni.attributes
-    return haskey(attrs, :step) &&
-           haskey(attrs, :min) &&
-           haskey(attrs, :max) &&
-           numberinput_integer_attribute(attrs[:step]) &&
-           numberinput_integer_attribute(attrs[:min]) &&
-           numberinput_integer_attribute(attrs[:max]) &&
-           numberinput_integer_attribute(ni.value[])
-end
+numberinput_prefers_integer_display(ni::NumberInput) = !numberinput_prefers_float_display(ni)
 
 """
     numberinput_display_value(session, ni)
