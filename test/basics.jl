@@ -28,10 +28,10 @@ end
         Bonito.NumberInput(55.0; step=0.5, min=0, max=100)
     )
     @test !Bonito.numberinput_prefers_integer_display(
-        Bonito.NumberInput(55.5; step=1, min=0, max=100)
+        Bonito.NumberInput(55.0; step=1.0, min=0, max=100)
     )
     @test !Bonito.numberinput_prefers_integer_display(Bonito.NumberInput(55.0; step=1, min=0))
-    @test Bonito.numberinput_prefers_integer_display(
+    @test !Bonito.numberinput_prefers_integer_display(
         Bonito.NumberInput(55.0; step="1", min="0", max="100")
     )
 end

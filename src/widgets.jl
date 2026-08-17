@@ -218,12 +218,7 @@ NumberInput
 Return whether an HTML number input attribute denotes an integer value.
 """
 numberinput_integer_attribute(value::Integer) = true
-numberinput_integer_attribute(value::AbstractFloat) = isfinite(value) && isinteger(value)
 numberinput_integer_attribute(value::Observable) = numberinput_integer_attribute(value[])
-function numberinput_integer_attribute(value::AbstractString)
-    parsed = tryparse(Float64, value)
-    return !isnothing(parsed) && numberinput_integer_attribute(parsed)
-end
 numberinput_integer_attribute(value) = false
 
 """
@@ -248,7 +243,7 @@ Return the observable value attribute used to display a NumberInput.
 function numberinput_display_value(session::Session, ni::NumberInput)
     if numberinput_prefers_integer_display(ni)
         return map(session, ni.value) do value
-            numberinput_integer_attribute(value) ? string(round(Int, value)) : string(value)
+            isinteger(value) ? string(round(Int, value)) : string(value)
         end
     else
         return ni.value
