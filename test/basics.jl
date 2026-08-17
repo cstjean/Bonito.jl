@@ -14,6 +14,7 @@ end
 @testset "NumberInput integer display" begin
     ni = Bonito.NumberInput(55.0; step=1, min=0, max=100)
     @test Bonito.numberinput_prefers_integer_display(ni)
+    @test !haskey(Bonito.numberinput_dom_attributes(ni), Bonito.NUMBERINPUT_INTEGER_DISPLAY_KEY)
 
     session = OfflineSession()
     displayed = Bonito.numberinput_display_value(session, ni)
@@ -40,6 +41,17 @@ end
     @test Bonito.numberinput_prefers_integer_display(
         Bonito.NumberInput(55.0; step="1", min="0", max="100")
     )
+    @test !Bonito.numberinput_prefers_integer_display(
+        Bonito.NumberInput(55.5; step=1, min=0, max=100)
+    )
+
+    fixed_at_creation = Bonito.NumberInput(55.0; step=1, min=0, max=100)
+    fixed_at_creation.attributes[:step] = 1.0
+    @test Bonito.numberinput_prefers_integer_display(fixed_at_creation)
+
+    fixed_at_creation = Bonito.NumberInput(55.0; step=1.0, min=0, max=100)
+    fixed_at_creation.attributes[:step] = 1
+    @test !Bonito.numberinput_prefers_integer_display(fixed_at_creation)
 end
 
 @testset "Asset value equality dedup" begin
