@@ -212,35 +212,7 @@ $(NUMBERINPUT_EXAMPLE)
 """
 NumberInput
 
-"""
-    numberinput_float_attribute(value)
-
-Return whether an HTML number input attribute is a floating point value.
-"""
-numberinput_float_attribute(value::AbstractFloat) = true
-numberinput_float_attribute(value::Observable) = numberinput_float_attribute(value[])
-numberinput_float_attribute(value) = false
-
 const NUMBERINPUT_INTEGER_DISPLAY_KEY = :bonito_integer_display
-
-"""
-    numberinput_prefers_float_display(value, attrs)
-
-Return whether the initial value or present control attributes request float display.
-"""
-function numberinput_prefers_float_display(value, attrs)
-    isinteger(value) || return true
-    haskey(attrs, :step) && numberinput_float_attribute(attrs[:step]) && return true
-    haskey(attrs, :min) && numberinput_float_attribute(attrs[:min]) && return true
-    haskey(attrs, :max) && numberinput_float_attribute(attrs[:max]) && return true
-    return false
-end
-
-function NumberInput(value::Float64; kw...)
-    attrs = Dict{Symbol,Any}(kw)
-    attrs[NUMBERINPUT_INTEGER_DISPLAY_KEY] = !numberinput_prefers_float_display(value, attrs)
-    return NumberInput(Observable(value), attrs)
-end
 
 """
     numberinput_prefers_integer_display(ni)
